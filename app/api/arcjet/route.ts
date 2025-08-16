@@ -17,7 +17,7 @@ export const aj = arcjet({
 
 export async function GET(req: Request) {
   const user = await currentUser();
-  // fallback to IP if no logged-in user
+  // fallback to IP if no logged-in use
   const userId =
     user?.primaryEmailAddress?.emailAddress ||
     req.headers.get("x-forwarded-for") ||
