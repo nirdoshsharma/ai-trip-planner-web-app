@@ -1,5 +1,6 @@
 import arcjet, { tokenBucket } from "@arcjet/next";
 import { NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 export const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
@@ -15,9 +16,14 @@ export const aj = arcjet({
 });
 
 export async function GET(req: Request) {
-  const userId = "user123"; // replace with actual authenticated userId
+  const user = await currentUser();
+  // fallback to IP if no logged-in user
+  const userId =
+    user?.primaryEmailAddress?.emailAddress ||
+    req.headers.get("x-forwarded-for") ||
+    "anonymous";
 
-  // Deduct 1 token per request (you can change this if needed)
+  // Deduct 1 token per request
   const decision = await aj.protect(req, { userId, requested: 1 });
 
   console.log("Arcjet decision:", decision);
