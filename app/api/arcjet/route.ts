@@ -4,21 +4,23 @@ import { NextResponse } from "next/server";
 export const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
-    // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      characteristics: ["userId"], // track requests by a custom user ID
-      refillRate: 5, // refill 5 tokens per interval
-      interval: 86400, // refill every 1 day  (24 hrs in seconds)
-      capacity: 2, // bucket maximum capacity of 10 tokens
+      mode: "LIVE", // "LIVE" blocks requests, "DRY_RUN" only logs
+      characteristics: ["userId"], // track requests by userId
+      refillRate: 5, // add 5 tokens per interval
+      interval: 86400, // interval in seconds (1 day)
+      capacity: 10, // bucket capacity (max tokens)
     }),
   ],
 });
 
 export async function GET(req: Request) {
-  const userId = "user123"; // Replace with your authenticated user ID
-  const decision = await aj.protect(req, { userId, requested: 5 }); // Deduct 5 tokens from the bucket
-  console.log("Arcjet decision", decision);
+  const userId = "user123"; // replace with actual authenticated userId
+
+  // Deduct 1 token per request (you can change this if needed)
+  const decision = await aj.protect(req, { userId, requested: 1 });
+
+  console.log("Arcjet decision:", decision);
 
   if (decision.isDenied()) {
     return NextResponse.json(
